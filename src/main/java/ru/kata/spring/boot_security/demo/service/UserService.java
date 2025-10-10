@@ -66,6 +66,30 @@ public class UserService implements UserDetailsService {
         return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
     }
 
+    @Transactional(readOnly = true)
+    public UserCreateDto getUserDtoById(Long id) {
+        User user = getUserById(id);
+        if (user == null) {
+            throw new UserNotFoundException(id);
+        }
+
+        // Создаем DTO из существующего пользователя
+        UserCreateDto userDto = new UserCreateDto();
+        userDto.setUsername(user.getUsername());
+        userDto.setFirstName(user.getFirstName());
+        userDto.setLastName(user.getLastName());
+        userDto.setEmail(user.getEmail());
+        userDto.setAge(user.getAge());
+
+        // Получаем ID ролей пользователя
+        Long[] roleIds = user.getRoles().stream()
+                .map(Role::getId)
+                .toArray(Long[]::new);
+        userDto.setRoleIds(roleIds);
+
+        return userDto;
+    }
+
     public void saveUser(UserCreateDto userDto) {
         //метод сохраняет пользователя с массивом ID ролей
         // Проверка уникальности

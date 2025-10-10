@@ -5,8 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.dto.UserCreateDto;
-import ru.kata.spring.boot_security.demo.model.Role;
-import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.exception.UserNotFoundException;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
@@ -45,27 +44,13 @@ public class AdminController {
     @GetMapping("/edit/{id}")
     public String showEditUserForm(@PathVariable Long id, Model model) {
         //@PathVariable - извлекает значение из URL
-        User user = userService.getUserById(id);
-        if (user != null) {
-            // Создаем DTO из существующего пользователя
-            UserCreateDto userDto = new UserCreateDto();
-            userDto.setUsername(user.getUsername());
-            userDto.setFirstName(user.getFirstName());
-            userDto.setLastName(user.getLastName());
-            userDto.setEmail(user.getEmail());
-            userDto.setAge(user.getAge());
-
-            // Получаем ID ролей пользователя
-            Long[] roleIds = user.getRoles().stream()
-                    .map(Role::getId)
-                    .toArray(Long[]::new);
-            userDto.setRoleIds(roleIds);
-
+        try {
+            UserCreateDto userDto = userService.getUserDtoById(id);
             model.addAttribute("userDto", userDto);
-            model.addAttribute("userId", id); // Передаем ID отдельно
+            model.addAttribute("userId", id);
             model.addAttribute("allRoles", roleService.getAllRoles());
             return "edit-user";
-        } else {
+        } catch (UserNotFoundException e) {
             return "redirect:/admin?error=user_not_found";
         }
     }
