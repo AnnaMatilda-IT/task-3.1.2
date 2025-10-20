@@ -10,7 +10,7 @@ import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
 @Controller
-@RequestMapping("/admin") //задаем базовый URL для всех методов контроллера админа
+@RequestMapping("/admin")
 public class AdminController {
     private final UserService userService;
     private final RoleService roleService;
@@ -43,7 +43,6 @@ public class AdminController {
 
     @GetMapping("/edit/{id}")
     public String showEditUserForm(@PathVariable Long id, Model model) {
-        //@PathVariable - извлекает значение из URL
         try {
             UserCreateDto userDto = userService.getUserDtoById(id);
             model.addAttribute("userDto", userDto);
